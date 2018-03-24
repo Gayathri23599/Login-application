@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var mysql = require('mysql');
-var c_id = null;
+var c__id = null;
 var s__id = null;
 var loginto = require('../modules/loginto');
 var connection = mysql.createConnection({
@@ -65,11 +65,14 @@ router.get('/logout',function(req,res,next){
 router.post('/logout',loginto.login);
 
 router.get('/success',function(req,res,next){
-	var sql = "SELECT * FROM(SELECT * FROM client WHERE client_id = ? )INNER JOIN bmi ON bmi.c_id = client.client_id"
+	console.log(c_id);	
+	var sql = "SELECT * FROM (SELECT * FROM client WHERE client_id = ? ) a  INNER JOIN bmi ON bmi.c_id = a.client_id";
+	//console.log(sql);
 	connection.query(sql,[c_id],function(err,results){
 		if(!err){
 			console.log(results);
-			res.render('success',{results});
+			var item = results[0];
+			res.render('success',{item});
 		}
 		else{
 			console.log('error');
@@ -77,5 +80,29 @@ router.get('/success',function(req,res,next){
 		}
 	});
 			
-});	
+});
+
+router.get('/dashboard',function(req,res,next){
+	res.render('dashboard');
+});
+
+router.post('/dashboard',function(req,res,next){
+	var item = req.body;
+	var sql = "UPDATE client SET address = ? , workplace = ? , designation = ? where client_id = ?";
+	connection.query(sql,[item.address,item.workplace,item.desg,c_id],function(err,results){
+		if(err){
+			console.log(err);
+			res.redirect('/dashboard');
+		}
+	});
+	var qry = "UPDATE bmi SET height=?,weight=?,date_of_birth=? where c_id=?";
+	connection.query(qry,[item.height,item.weight,item.dob,c_id],function(err,result){
+		if(err){
+			console.log(err);
+			res.redirect('/dashboard');
+		}
+	});
+	res.redirect('/success');
+});
+	
 module.exports = router;

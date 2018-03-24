@@ -26,14 +26,14 @@ exports.login = function(req,res,next) {
 							else
 								res.render('error');
 						});
-					 res.render('success');
+					 res.redirect('/success');
 				}
 				else
 					res.render('relogin');
 			}
 			else{
 				console.log(err);
-				res.send('error');
+				res.render('error');
 			}
 		});
 	});
